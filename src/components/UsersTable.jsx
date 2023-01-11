@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-
+import uuid from 'react-uuid';
 
 const Table = styled.table`
   width: 100%;
@@ -35,21 +35,44 @@ function UsersTable() {
     fetchUsers();
   }, [editingUser]);
 
+  // const handleSort = (field) => {
+  //   if (sortField === field) {
+  //     setUsers([...users].reverse()); // reverse the current order
+  //     return;
+  //   }
+  //   setSortField(field);
+  //   const sortedUsers = [...users].sort((a, b) => {
+  //     if (a[field] < b[field]) {
+  //       return -1;
+  //     }
+  //     if (a[field] > b[field]) {
+  //       return 1;
+  //     }
+  //     return 0;
+  //   });
+  //   setUsers(sortedUsers);
+  // };
+
   const handleSort = (field) => {
     if (sortField === field) {
       setUsers([...users].reverse()); // reverse the current order
       return;
     }
     setSortField(field);
-    const sortedUsers = [...users].sort((a, b) => {
-      if (a[field] < b[field]) {
-        return -1;
-      }
-      if (a[field] > b[field]) {
-        return 1;
-      }
-      return 0;
-    });
+    let sortedUsers = [...users]
+    if (field === 'age') {
+      sortedUsers = sortedUsers.sort((a, b) => a[field] - b[field])
+    } else {
+      sortedUsers = sortedUsers.sort((a, b) => {
+        if (a[field].toLowerCase() < b[field].toLowerCase()) {
+          return -1;
+        }
+        if (a[field].toLowerCase() > b[field].toLowerCase()) {
+          return 1;
+        }
+        return 0;
+      });
+    }
     setUsers(sortedUsers);
   };
 
@@ -118,7 +141,7 @@ function UsersTable() {
     setNewUser({
       username: "",
       email: "",
-      age: "",
+      age: null,
       country: ""
     });
   };
@@ -149,11 +172,11 @@ function UsersTable() {
               {editingUser?.id === user.id ? (
                 <input
                   name="username"
-                  value={editingUser?.username || ""}
+                  value={editingUser?.username}
                   onChange={handleEditUserChange}
                 />
               ) : (
-                user.username || ""
+                user.username
               )}
             </td>
             <td>

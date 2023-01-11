@@ -4,14 +4,14 @@
       "id": 1,
       "username": "John Doe",
       "email": "johndoe@example.ru",
-      "age": 32,
-      "country": "United States"
+      "age": "320",
+      "country": "United Kingdom"
     },
     {
       "id": 2,
       "username": "Jane Doe",
       "email": "jane34asdf345@example.com",
-      "age": "34",
+      "age": "3400",
       "country": "Canada"
     },
     {
@@ -62,20 +62,6 @@
       "email": "beyonce@example.com",
       "age": 39,
       "country": "United States"
-    },
-    {
-      "id": 10,
-      "username": "Mark Zuckerberg",
-      "email": "markzuckerberg@example.com",
-      "age": 36,
-      "country": "United States"
-    },
-    {
-      "username": "asdf asdf",
-      "email": "asdfasdf@gmail.com",
-      "age": "45",
-      "country": "Russia",
-      "id": 11
     }
   ]
 }
