@@ -1,0 +1,64 @@
+{
+  "users": [
+    {
+      "username": "John Doe",
+      "email": "johndoe@example.com",
+      "age": 32,
+      "country": "United States"
+    },
+    {
+      "username": "Jane Doe",
+      "email": "janedoe@example.com",
+      "age": 29,
+      "country": "Canada"
+    },
+    {
+      "username": "Bob Smith",
+      "email": "bobsmith@example.com",
+      "age": 45,
+      "country": "United Kingdom"
+    },
+    {
+      "username": "Emma Watson",
+      "email": "emmawatson@example.com",
+      "age": 27,
+      "country": "France"
+    },
+    {
+      "username": "Michael Jordan",
+      "email": "michaeljordan@example.com",
+      "age": 56,
+      "country": "United States"
+    },
+    {
+      "username": "Brad Pitt",
+      "email": "bradpitt@example.com",
+      "age": 57,
+      "country": "United States"
+    },
+    {
+      "username": "Taylor Swift",
+      "email": "taylorswift@example.com",
+      "age": 31,
+      "country": "United States"
+    },
+    {
+      "username": "Leonardo DiCaprio",
+      "email": "leonardodicaprio@example.com",
+      "age": 45,
+      "country": "United States"
+    },
+    {
+      "username": "Beyonce",
+      "email": "beyonce@example.com",
+      "age": 39,
+      "country": "United States"
+    },
+    {
+      "username": "Mark Zuckerberg",
+      "email": "markzuckerberg@example.com",
+      "age": 36,
+      "country": "United States"
+    }
+  ]
+}
