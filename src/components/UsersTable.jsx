@@ -33,29 +33,11 @@ function UsersTable() {
       setUsers(users);
     }
     fetchUsers();
-  }, [editingUser]);
-
-  // const handleSort = (field) => {
-  //   if (sortField === field) {
-  //     setUsers([...users].reverse()); // reverse the current order
-  //     return;
-  //   }
-  //   setSortField(field);
-  //   const sortedUsers = [...users].sort((a, b) => {
-  //     if (a[field] < b[field]) {
-  //       return -1;
-  //     }
-  //     if (a[field] > b[field]) {
-  //       return 1;
-  //     }
-  //     return 0;
-  //   });
-  //   setUsers(sortedUsers);
-  // };
+  }, []);
 
   const handleSort = (field) => {
     if (sortField === field) {
-      setUsers([...users].reverse()); // reverse the current order
+      setUsers([...users].reverse());
       return;
     }
     setSortField(field);
