@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import styled from 'styled-components';
 import uuid from 'react-uuid';
 
@@ -14,66 +14,93 @@ const Table = styled.table`
   }
 `;
 
-function UsersTable() {
-  const [users, setUsers] = useState([]);
-  const [sortField, setSortField] = useState(null);
-  const [editingUser, setEditingUser] = useState(null);
-
-  const [newUser, setNewUser] = useState({
+const initialState = {
+  users: [],
+  sortField: null,
+  editingUser: null,
+  newUser: {
     username: "",
     email: "",
     age: "",
     country: ""
-  });
+  }
+}
 
+const usersReducer = (state, action) => {
+  switch (action.type) {
+    case "FETCH_USERS":
+      return { ...state, users: action.payload }
+    case "SORT_USERS":
+      let sortField = action.payload
+      let sortedUsers = [...state.users];
+
+      if (state.sortField === sortField) {
+        sortedUsers.reverse();
+      } else if (sortField === 'age') {
+        sortedUsers = sortedUsers.sort((a, b) => a[sortField] - b[sortField]);
+      } else {
+        sortedUsers = sortedUsers.sort((a, b) => {
+          if (a[sortField].toLowerCase() < b[sortField].toLowerCase()) {
+            return -1;
+          }
+          if (a[sortField].toLowerCase() > b[sortField].toLowerCase()) {
+            return 1;
+          }
+          return 0;
+        });
+      }
+      return { ...state, users: sortedUsers, sortField: action.payload };
+
+    case "EDIT_USER":
+      return { ...state, editingUser: action.payload }
+    case "DELETE_USER":
+      // delete user logic
+      return { ...state, users: action.payload }
+    case "SAVE_USER":
+      // save user logic
+      return { ...state, users: action.payload }
+    case "CANCEL_EDIT":
+      return { ...state, editingUser: null }
+    case "CREATE_USER":
+      // create user logic
+      return { ...state, newUser: { username: "", email: "", age: null, country: "" } }
+    case "HANDLE_NEW_USER_CHANGE":
+      return { ...state, newUser: action.payload }
+    case "HANDLE_EDIT_USER_CHANGE":
+      return { ...state, editingUser: action.payload }
+    default:
+      return state;
+  }
+}
+
+function UsersTable() {
+  const [state, dispatch] = useReducer(usersReducer, initialState);
+  const { users, sortField, editingUser, newUser } = state;
   useEffect(() => {
     async function fetchUsers() {
       const response = await fetch('http://localhost:3001/users');
       const users = await response.json();
-      setUsers(users);
+      dispatch({ type: "FETCH_USERS", payload: users });
     }
     fetchUsers();
   }, []);
 
   const handleSort = (field) => {
-    if (sortField === field) {
-      setUsers([...users].reverse());
-      return;
-    }
-    setSortField(field);
-    let sortedUsers = [...users]
-    if (field === 'age') {
-      sortedUsers = sortedUsers.sort((a, b) => a[field] - b[field])
-    } else {
-      sortedUsers = sortedUsers.sort((a, b) => {
-        if (a[field].toLowerCase() < b[field].toLowerCase()) {
-          return -1;
-        }
-        if (a[field].toLowerCase() > b[field].toLowerCase()) {
-          return 1;
-        }
-        return 0;
-      });
-    }
-    setUsers(sortedUsers);
+    dispatch({ type: "SORT_USERS", payload: field });
   };
 
   const handleNewUserChange = (e) => {
-    setNewUser({
-      ...newUser,
-      [e.target.name]: e.target.value
-    });
+    const newUser = { ...state.newUser, [e.target.name]: e.target.value };
+    dispatch({ type: "HANDLE_NEW_USER_CHANGE", payload: newUser });
   };
 
   const handleEditUserChange = (e) => {
-    setEditingUser({
-      ...editingUser,
-      [e.target.name]: e.target.value
-    });
+    const editingUser = { ...state.editingUser, [e.target.name]: e.target.value };
+    dispatch({ type: "HANDLE_EDIT_USER_CHANGE", payload: editingUser });
   };
 
   const handleEditUser = (user) => {
-    setEditingUser({ ...user });
+    dispatch({ type: "EDIT_USER", payload: user });
   };
 
   const handleDeleteUser = (user) => {
@@ -82,7 +109,7 @@ function UsersTable() {
         method: "DELETE"
       });
       const updatedUsers = users.filter((u) => u.id !== user.id);
-      setUsers(updatedUsers);
+      dispatch({ type: "DELETE_USER", payload: updatedUsers });
     }
     deleteUser(user);
   };
@@ -109,137 +136,118 @@ function UsersTable() {
       const updatedUsers = user.id
         ? users.map((u) => (u.id === savedUser.id ? savedUser : u))
         : [...users, savedUser];
-      setUsers(updatedUsers);
+      dispatch({ type: "SAVE_USER", payload: updatedUsers });
     }
     saveUser(user);
-    setEditingUser(null);
   };
 
   const handleCancelEdit = () => {
-    setEditingUser(null);
+    dispatch({ type: "CANCEL_EDIT" });
   };
 
   const handleCreateUser = () => {
     handleSaveUser(newUser);
-    setNewUser({
-      username: "",
-      email: "",
-      age: null,
-      country: ""
-    });
+    dispatch({ type: "CREATE_USER" });
   };
 
   return (
     <Table>
-      {/* <table> */}
       <thead>
         <tr>
-          <th>
-            <button onClick={() => handleSort('username')}>Username</button>
-          </th>
-          <th>
-            <button onClick={() => handleSort('email')}>Email</button>
-          </th>
-          <th>
-            <button onClick={() => handleSort('age')}>Age</button>
-          </th>
-          <th>
-            <button onClick={() => handleSort('country')}>Country</button>
-          </th>
+          <th onClick={() => handleSort('username')}>Username</th>
+          <th onClick={() => handleSort('email')}>Email</th>
+          <th onClick={() => handleSort('age')}>Age</th>
+          <th onClick={() => handleSort('country')}>Country</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        {users.map((user) => (
-          <tr key={user.id}>
-            <td>
-              {editingUser?.id === user.id ? (
-                <input
-                  name="username"
-                  value={editingUser?.username}
-                  onChange={handleEditUserChange}
-                />
-              ) : (
-                user.username
-              )}
-            </td>
-            <td>
-              {editingUser?.id === user.id ? (
-                <input
-                  name="email"
-                  value={editingUser?.email}
-                  onChange={handleEditUserChange}
-                />
-              ) : (
-                user.email
-              )}
-            </td>
-            <td>
-              {editingUser?.id === user.id ? (
-                <input
-                  name="age"
-                  value={editingUser?.age}
-                  onChange={handleEditUserChange}
-                />
-              ) : (
-                user.age
-              )}
-            </td>
-            <td>
-              {editingUser?.id === user.id ? (
-                <input
-                  name="country"
-                  value={editingUser?.country}
-                  onChange={handleEditUserChange}
-                />
-              ) : (
-                user.country
-              )}
-            </td>
-            <td>
-              {editingUser?.id === user.id ? (
-                <>
-                  <button onClick={() => handleSaveUser(editingUser)}>
-                    Save
-                  </button>
+        {state.users.map((user) => (
+          <tr key={uuid()}>
+            {editingUser && editingUser.id === user.id ? (
+              <>
+                <td>
+                  <input
+                    type="text"
+                    name="username"
+                    value={editingUser.username}
+                    onChange={handleEditUserChange}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    name="email"
+                    value={editingUser.email}
+                    onChange={handleEditUserChange}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    name="age"
+                    value={editingUser.age}
+                    onChange={handleEditUserChange}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    name="country"
+                    value={editingUser.country}
+                    onChange={handleEditUserChange}
+                  />
+                </td>
+                <td>
+                  <button onClick={() => handleSaveUser(editingUser)}>Save</button>
                   <button onClick={handleCancelEdit}>Cancel</button>
-                </>
-              ) : (
-                <>
+                </td>
+              </>
+            ) : (
+              <>
+                <td>{user.username}</td>
+
+                <td>{user.email}</td>
+                <td>{user.age}</td>
+                <td>{user.country}</td>
+                <td>
                   <button onClick={() => handleEditUser(user)}>Edit</button>
                   <button onClick={() => handleDeleteUser(user)}>Delete</button>
-                </>
-              )}
-            </td>
+                </td>
+              </>
+            )}
           </tr>
         ))}
-      </tbody>
-      <tfoot>
         <tr>
           <td>
             <input
+              type="text"
               name="username"
-              value={newUser?.username}
+              value={state.newUser.username}
               onChange={handleNewUserChange}
             />
           </td>
           <td>
             <input
+              type="text"
               name="email"
-              value={newUser?.email}
+              value={state.newUser.email}
               onChange={handleNewUserChange}
             />
           </td>
           <td>
             <input
+              type="number"
               name="age"
-              value={newUser?.age}
+              value={state.newUser.age}
               onChange={handleNewUserChange}
             />
           </td>
           <td>
             <input
+              type="text"
               name="country"
-              value={newUser?.country}
+              value={state.newUser.country}
               onChange={handleNewUserChange}
             />
           </td>
@@ -247,10 +255,8 @@ function UsersTable() {
             <button onClick={handleCreateUser}>Create</button>
           </td>
         </tr>
-      </tfoot>
-      {/* </table> */}
+      </tbody>
     </Table>
   );
 }
-
 export default UsersTable;
