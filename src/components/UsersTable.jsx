@@ -1,10 +1,17 @@
+import Autosuggest from 'react-autosuggest';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import uuid from 'react-uuid';
+import { countries } from '../data/countries';
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+  background-color: #282c34;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
 
   th,
   td {
@@ -12,14 +19,72 @@ const Table = styled.table`
     text-align: left;
     border-bottom: 1px solid #ddd;
   }
+
+  .react-autosuggest__container {
+  position: relative;
+}
+
+.react-autosuggest__input {
+  width: 240px;
+  height: 30px;
+  padding: 10px 20px;
+  font-family: Helvetica, sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background-color: #282c34;
+  color: white;
+}
+
+.react-autosuggest__input--focused {
+  outline: none;
+}
+
+.react-autosuggest__input--open {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.react-autosuggest__suggestions-container--open {
+  display: block;
+  position: absolute;
+  top: 51px;
+  width: 280px;
+  border: 1px solid #aaa;
+  background-color: #282c34;
+  font-family: Helvetica, sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  z-index: 2;
+  cursor: pointer;
+}
 `;
+
+const getSuggestions = value => {
+  const inputValue = value.trim().toLowerCase();
+  const inputLength = inputValue.length;
+
+  return inputLength === 0 ? [] : countries.filter(country =>
+    country.toLowerCase().slice(0, inputLength) === inputValue
+  );
+};
+
+const getSuggestionValue = suggestion => suggestion;
+
+const renderSuggestion = suggestion => (
+  <div>
+    {suggestion}
+  </div>
+);
 
 function UsersTable() {
   const [users, setUsers] = useState([]);
-  const [sortField, setSortField] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
-
+  const [suggestions, setSuggestions] = useState([]);
 
   const [newUser, setNewUser] = useState({
     username: "",
@@ -67,7 +132,6 @@ function UsersTable() {
     setUsers(sortedUsers);
   };
 
-
   const handleNewUserChange = (e) => {
     setNewUser({
       ...newUser,
@@ -101,14 +165,14 @@ function UsersTable() {
     async function saveUser(user) {
       let response;
       if (user.id) {
-        // update existing user
+        // редактировать существующего пользователя
         response = await fetch(`http://localhost:3001/users/${user.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(user)
         });
       } else {
-        // create new user
+        // создать нового пользователя
         response = await fetch("http://localhost:3001/users", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -139,9 +203,28 @@ function UsersTable() {
     });
   };
 
+  const handleSuggestionsFetchRequested = ({ value }) => {
+    setSuggestions(getSuggestions(value));
+  };
+
+  const handleSuggestionsClearRequested = () => {
+    setSuggestions([]);
+  };
+
+  const inputProps = {
+    placeholder: 'Type a country',
+    value: editingUser ? editingUser.country : newUser.country,
+    onChange: (e, { newValue }) => {
+      if (editingUser) {
+        setEditingUser({ ...editingUser, country: newValue });
+      } else {
+        setNewUser({ ...newUser, country: newValue });
+      }
+    },
+  };
+
   return (
     <Table>
-      {/* <table> */}
       <thead>
         <tr>
           <th>
@@ -155,6 +238,9 @@ function UsersTable() {
           </th>
           <th>
             <button onClick={() => handleSort('country')}>Country</button>
+          </th>
+          <th>
+            <button>Actions</button>
           </th>
         </tr>
       </thead>
@@ -196,10 +282,13 @@ function UsersTable() {
             </td>
             <td>
               {editingUser?.id === user.id ? (
-                <input
-                  name="country"
-                  value={editingUser?.country}
-                  onChange={handleEditUserChange}
+                <Autosuggest
+                  suggestions={suggestions}
+                  onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
+                  onSuggestionsClearRequested={handleSuggestionsClearRequested}
+                  getSuggestionValue={getSuggestionValue}
+                  renderSuggestion={renderSuggestion}
+                  inputProps={inputProps}
                 />
               ) : (
                 user.country
@@ -258,7 +347,6 @@ function UsersTable() {
           </td>
         </tr>
       </tfoot>
-      {/* </table> */}
     </Table>
   );
 }
