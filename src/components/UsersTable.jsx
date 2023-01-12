@@ -1,7 +1,9 @@
-import Autosuggest from 'react-autosuggest';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { countries } from '../data/countries';
+import Autocomplete from './Autocomplete';
+// import Autosuggest from 'react-autosuggest';
+// import AutocompleteContainer from './AutocompleteContainer';
 
 const Table = styled.table`
   width: 100%;
@@ -223,6 +225,10 @@ function UsersTable() {
     },
   };
 
+  const handleSelect = (suggestion) => {
+    setEditingUser({ ...editingUser, country: suggestion });
+  };
+
   return (
     <Table>
       <thead>
@@ -282,14 +288,68 @@ function UsersTable() {
             </td>
             <td>
               {editingUser?.id === user.id ? (
-                <Autosuggest
-                  suggestions={suggestions}
-                  onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
-                  onSuggestionsClearRequested={handleSuggestionsClearRequested}
-                  getSuggestionValue={getSuggestionValue}
-                  renderSuggestion={renderSuggestion}
-                  inputProps={inputProps}
+
+
+                // <Autocomplete suggestions={countries} value={editingUser?.country} onChange={handleEditUserChange}/>
+
+                // <AutocompleteContainer suggestions={countries}>
+                //   <input
+                //     name="country"
+                //     value={editingUser?.country}
+                //     onChange={handleEditUserChange}
+                //   />
+                // </AutocompleteContainer>
+
+                // <Autocomplete
+                //   items={countries}
+                //   onSelect={(country) => setNewUser({ ...newUser, country })}
+                // />
+
+                // <Autocomplete
+                //   items={countries}
+                //   name="country"
+                //   value={editingUser?.country}
+                //   onChange={handleEditUserChange}
+                //   onSelect={(country) => setEditingUser({ ...editingUser, country })}
+                // />
+
+                // <input
+                //   name="country"
+                //   value={editingUser?.country}
+                //   onChange={handleEditUserChange}
+                // />
+
+                // <Autosuggest
+                //   suggestions={suggestions}
+                //   onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
+                //   onSuggestionsClearRequested={handleSuggestionsClearRequested}
+                //   getSuggestionValue={getSuggestionValue}
+                //   renderSuggestion={renderSuggestion}
+                //   inputProps={inputProps}
+                // />
+
+                // <Autocomplete
+                //   items={countries}
+                //   name="country"
+                //   value={editingUser?.country}
+                //   onChange={handleEditUserChange}
+                //   onSelect={(country) => setEditingUser({ ...editingUser, country })}
+                //   onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
+                //   onSuggestionsClearRequested={handleSuggestionsClearRequested}
+                //   inputProps={inputProps}
+                // />
+
+                <Autocomplete
+                  items={countries}
+                  name="country"
+                  value={editingUser?.country}
+                  onChange={handleEditUserChange}
+                  onSelect={handleSelect}
+                // onSelect={(val) => {
+                //   setEditingUser({ ...editingUser, country: val });
+                // }}
                 />
+
               ) : (
                 user.country
               )}
