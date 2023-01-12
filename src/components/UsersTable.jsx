@@ -112,6 +112,7 @@ function UsersTable() {
       setUsers(updatedUsers);
     }
     saveUser(user);
+    setEditingUser(null);
   };
 
   const handleCancelEdit = () => {
