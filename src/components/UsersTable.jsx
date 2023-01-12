@@ -15,7 +15,6 @@ const Table = styled.table`
 
 function UsersTable() {
   const [users, setUsers] = useState([]);
-  const [sortField, setSortField] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
 
   useEffect(() => {
@@ -28,11 +27,6 @@ function UsersTable() {
   }, []);
 
   const handleSort = (field) => {
-    if (sortField === field) {
-      setUsers([...users].reverse());
-      return;
-    }
-    setSortField(field);
     let sortedUsers = [...users]
     if (field === 'age') {
       sortedUsers = sortedUsers.sort((a, b) => a[field] - b[field])
