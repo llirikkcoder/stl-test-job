@@ -18,6 +18,8 @@ function UsersTable() {
   const [users, setUsers] = useState([]);
   const [sortField, setSortField] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
+  const [sortOrder, setSortOrder] = useState("asc");
+
 
   const [newUser, setNewUser] = useState({
     username: "",
@@ -36,27 +38,35 @@ function UsersTable() {
   }, []);
 
   const handleSort = (field) => {
-    if (sortField === field) {
-      setUsers([...users].reverse());
-      return;
-    }
-    setSortField(field);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     let sortedUsers = [...users]
     if (field === 'age') {
-      sortedUsers = sortedUsers.sort((a, b) => a[field] - b[field])
+      sortedUsers = sortOrder === "asc" ? sortedUsers.sort((a, b) => a[field] - b[field]) : sortedUsers.sort((a, b) => b[field] - a[field])
     } else {
-      sortedUsers = sortedUsers.sort((a, b) => {
-        if (a[field].toLowerCase() < b[field].toLowerCase()) {
-          return -1;
-        }
-        if (a[field].toLowerCase() > b[field].toLowerCase()) {
-          return 1;
-        }
-        return 0;
-      });
+      sortedUsers = sortOrder === "asc" ?
+        sortedUsers.sort((a, b) => {
+          if (a[field].toLowerCase() < b[field].toLowerCase()) {
+            return -1;
+          }
+          if (a[field].toLowerCase() > b[field].toLowerCase()) {
+            return 1;
+          }
+          return 0;
+        })
+        :
+        sortedUsers.sort((a, b) => {
+          if (b[field].toLowerCase() < a[field].toLowerCase()) {
+            return -1;
+          }
+          if (b[field].toLowerCase() > a[field].toLowerCase()) {
+            return 1;
+          }
+          return 0;
+        });
     }
     setUsers(sortedUsers);
   };
+
 
   const handleNewUserChange = (e) => {
     setNewUser({
