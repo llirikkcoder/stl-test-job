@@ -174,8 +174,8 @@ function UsersTable() {
       <Table>
         <thead>
           <tr>
-            {["username", "email", "age", "country"].map((item) => (
-              <th>
+            {["username", "email", "age", "country"].map((item, index) => (
+              <th key={index}>
                 <button onClick={() => handleSort(item)}>{item.charAt(0).toUpperCase() + item.slice(1)}</button>
               </th>
             ))}
