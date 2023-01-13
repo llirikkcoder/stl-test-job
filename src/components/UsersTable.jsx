@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { countries } from '../data/countries';
 import ToastMessage from './ToastMessage';
 import Table from './Table';
-import AutosuggestField from './Autosuggest';
 import AutosuggestFieldNew from './AutosuggestNew';
+import UsersTableRow from './UsersTableRow';
 
 const getSuggestions = value => {
   const inputValue = value.trim().toLowerCase();
@@ -27,7 +27,6 @@ function UsersTable() {
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
-  const [suggestions, setSuggestions] = useState([]);
   const [suggestionsNew, setSuggestionsNew] = useState([]);
   const [toastMessage, setToastMessage] = useState("");
 
@@ -139,10 +138,6 @@ function UsersTable() {
     setEditingUser(null);
   };
 
-  const handleCancelEdit = () => {
-    setEditingUser(null);
-  };
-
   const handleCreateUser = () => {
     handleSaveUser(newUser);
     setNewUser({
@@ -153,24 +148,8 @@ function UsersTable() {
     });
   };
 
-  const handleSuggestionsFetchRequested = ({ value }) => {
-    setSuggestions(getSuggestions(value));
-  };
-
   const handleSuggestionsClearRequested = () => {
-    setSuggestions([]);
-  };
-
-  const inputProps = {
-    placeholder: 'Type a country',
-    value: editingUser ? editingUser.country : newUser.country,
-    onChange: (e, { newValue }) => {
-      if (editingUser) {
-        setEditingUser({ ...editingUser, country: newValue });
-      } else {
-        setNewUser({ ...newUser, country: newValue });
-      }
-    },
+    setSuggestionsNew([]);
   };
 
   const inputPropsNew = {
@@ -185,6 +164,10 @@ function UsersTable() {
     setToastMessage(message);
     setTimeout(() => setToastMessage(''), 2000);
   };
+
+  const handleUpdateUsers = (updatedUsers) => {
+    setUsers(updatedUsers);
+  }
 
   return (
     <>
@@ -201,54 +184,21 @@ function UsersTable() {
             </th>
           </tr>
         </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              {["username", "email", "age"].map((item) => (
-                <td>
-                  {editingUser?.id === user.id ? (
-                    <input
-                      name={item}
-                      value={editingUser?.[item]}
-                      onChange={handleEditUserChange}
-                    />
-                  ) : (
-                    user[item]
-                  )}
-                </td>
-              ))}
-              <td>
-                {editingUser?.id === user.id ? (
-                  <AutosuggestField
-                    suggestions={suggestions}
-                    onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
-                    onSuggestionsClearRequested={handleSuggestionsClearRequested}
-                    getSuggestionValue={getSuggestionValue}
-                    renderSuggestion={renderSuggestion}
-                    inputProps={inputProps}
-                  />
-                ) : (
-                  user.country
-                )}
-              </td>
-              <td>
-                {editingUser?.id === user.id ? (
-                  <>
-                    <button onClick={() => handleSaveUser(editingUser)}>
-                      Save
-                    </button>
-                    <button onClick={handleCancelEdit}>Cancel</button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={() => handleEditUser(user)}>Edit</button>
-                    <button onClick={() => handleDeleteUser(user)}>Delete</button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
+        {users.map((user) => (
+          <UsersTableRow
+            key={user.id}
+            user={user}
+            setEditingUser={setEditingUser}
+            editingUser={editingUser}
+            handleEditUser={handleEditUser}
+            handleEditUserChange={handleEditUserChange}
+            handleDeleteUser={handleDeleteUser}
+            handleSaveUser={handleSaveUser}
+            handleUpdateUsers={handleUpdateUsers}
+            users={users}
+            setUsers={setUsers}
+          />
+        ))}
         <tfoot>
           <tr>
             <td>
