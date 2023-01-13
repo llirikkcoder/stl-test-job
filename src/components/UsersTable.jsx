@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { countries } from '../data/countries';
-import Autocomplete from './Autocomplete';
-// import Autosuggest from 'react-autosuggest';
-// import AutocompleteContainer from './AutocompleteContainer';
+import Autosuggest from './Autosuggest';
 
 const Table = styled.table`
   width: 100%;
@@ -65,29 +63,10 @@ const Table = styled.table`
 }
 `;
 
-const getSuggestions = value => {
-  const inputValue = value.trim().toLowerCase();
-  const inputLength = inputValue.length;
-
-  return inputLength === 0 ? [] : countries.filter(country =>
-    country.toLowerCase().slice(0, inputLength) === inputValue
-  );
-};
-
-const getSuggestionValue = suggestion => suggestion;
-
-const renderSuggestion = suggestion => (
-  <div>
-    {suggestion}
-  </div>
-);
-
 function UsersTable() {
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
-  const [suggestions, setSuggestions] = useState([]);
-
   const [newUser, setNewUser] = useState({
     username: "",
     email: "",
@@ -148,6 +127,34 @@ function UsersTable() {
     });
   };
 
+  const handleSelectCountry = (country) => {
+    setEditingUser({
+      ...editingUser,
+      country
+    });
+  }
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    const response = await fetch(`http://localhost:3001/users/${editingUser.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(editingUser)
+    });
+    const updatedUser = await response.json();
+    setUsers(users.map(user => user.id === updatedUser.id ? updatedUser : user));
+    setEditingUser(null);
+  };
+
+  const handleDelete = async (id) => {
+    const response = await fetch(`http://localhost:3001/users/${id}`, {
+      method: "DELETE"
+    });
+    setUsers(users.filter(user => user.id !== id));
+  };
+
   const handleEditUser = (user) => {
     setEditingUser({ ...user });
   };
@@ -167,14 +174,12 @@ function UsersTable() {
     async function saveUser(user) {
       let response;
       if (user.id) {
-        // редактировать существующего пользователя
         response = await fetch(`http://localhost:3001/users/${user.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(user)
         });
       } else {
-        // создать нового пользователя
         response = await fetch("http://localhost:3001/users", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -205,29 +210,35 @@ function UsersTable() {
     });
   };
 
-  const handleSuggestionsFetchRequested = ({ value }) => {
-    setSuggestions(getSuggestions(value));
-  };
+  const handleCountrySelect = (country) => {
+    setEditingUser({
+      ...editingUser,
+      country
+    });
+  }
 
-  const handleSuggestionsClearRequested = () => {
-    setSuggestions([]);
-  };
+  const handleEditUserSelect = (country) => {
+    setEditingUser({
+      ...editingUser,
+      country: country
+    });
+  }
 
-  const inputProps = {
-    placeholder: 'Type a country',
-    value: editingUser ? editingUser.country : newUser.country,
-    onChange: (e, { newValue }) => {
-      if (editingUser) {
-        setEditingUser({ ...editingUser, country: newValue });
-      } else {
-        setNewUser({ ...newUser, country: newValue });
-      }
-    },
-  };
-
-  const handleSelect = (suggestion) => {
-    setEditingUser({ ...editingUser, country: suggestion });
-  };
+  const renderCell = (field, user) => {
+    if (field === 'country' && editingUser?.id === user.id) {
+      return (
+        <td>
+          <Autosuggest
+            items={countries}
+            value={editingUser?.country}
+            onChange={handleEditUserChange}
+            onSelect={handleCountrySelect}
+          />
+        </td>
+      )
+    }
+    return <td>{user[field]}</td>
+  }
 
   return (
     <Table>
@@ -288,72 +299,20 @@ function UsersTable() {
             </td>
             <td>
               {editingUser?.id === user.id ? (
-
-
-                // <Autocomplete suggestions={countries} value={editingUser?.country} onChange={handleEditUserChange}/>
-
-                // <AutocompleteContainer suggestions={countries}>
-                //   <input
-                //     name="country"
-                //     value={editingUser?.country}
-                //     onChange={handleEditUserChange}
-                //   />
-                // </AutocompleteContainer>
-
-                // <Autocomplete
-                //   items={countries}
-                //   onSelect={(country) => setNewUser({ ...newUser, country })}
-                // />
-
-                // <Autocomplete
-                //   items={countries}
-                //   name="country"
-                //   value={editingUser?.country}
-                //   onChange={handleEditUserChange}
-                //   onSelect={(country) => setEditingUser({ ...editingUser, country })}
-                // />
-
-                // <input
-                //   name="country"
-                //   value={editingUser?.country}
-                //   onChange={handleEditUserChange}
-                // />
-
-                // <Autosuggest
-                //   suggestions={suggestions}
-                //   onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
-                //   onSuggestionsClearRequested={handleSuggestionsClearRequested}
-                //   getSuggestionValue={getSuggestionValue}
-                //   renderSuggestion={renderSuggestion}
-                //   inputProps={inputProps}
-                // />
-
-                // <Autocomplete
-                //   items={countries}
-                //   name="country"
-                //   value={editingUser?.country}
-                //   onChange={handleEditUserChange}
-                //   onSelect={(country) => setEditingUser({ ...editingUser, country })}
-                //   onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
-                //   onSuggestionsClearRequested={handleSuggestionsClearRequested}
-                //   inputProps={inputProps}
-                // />
-
-                <Autocomplete
+                <Autosuggest
                   items={countries}
                   name="country"
                   value={editingUser?.country}
                   onChange={handleEditUserChange}
-                  onSelect={handleSelect}
-                // onSelect={(val) => {
-                //   setEditingUser({ ...editingUser, country: val });
-                // }}
+                  onSelect={handleEditUserSelect}
+                // onChange={(e) => handleEditUserChange(e)}
+                // onSelect={(suggestion) => handleEditUserSelect(suggestion)}
                 />
-
               ) : (
                 user.country
               )}
             </td>
+            {/* <renderCell /> */}
             <td>
               {editingUser?.id === user.id ? (
                 <>

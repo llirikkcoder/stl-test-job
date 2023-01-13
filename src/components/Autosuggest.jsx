@@ -23,6 +23,7 @@ function Autosuggest({ items, name, value, onChange, onSelect }) {
     onSelect(suggestion);
   };
 
+
   useEffect(() => {
     setSuggestions(getSuggestions(query));
   }, [query, items]);
