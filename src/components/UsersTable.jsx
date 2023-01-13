@@ -108,7 +108,6 @@ function UsersTable() {
   const [toastMessage, setToastMessage] = useState("");
 
   const [suggestionsNew, setSuggestionsNew] = useState([]);
-  // const [inputPropsNew, setInputPropsNew] = useState({});
 
   const handleSuggestionsFetchRequestedNew = ({ value }) => {
     setSuggestionsNew(getSuggestions(value));
@@ -127,8 +126,6 @@ function UsersTable() {
     age: "",
     country: ""
   });
-
-
 
   useEffect(() => {
     async function fetchUsers() {
@@ -264,7 +261,7 @@ function UsersTable() {
   const inputPropsNew = {
     placeholder: 'Type a country',
     value: newUser.country,
-    onChange: (event, { newValue }) => {
+    onChange: (e, { newValue }) => {
       setNewUser({ ...newUser, country: newValue });
     }
   };
@@ -396,7 +393,6 @@ function UsersTable() {
                 renderSuggestion={renderSuggestionNew}
                 inputProps={inputPropsNew}
               />
-
             </td>
             <td>
               <button onClick={handleCreateUser}>Create</button>
