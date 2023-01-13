@@ -3,12 +3,6 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { countries } from '../data/countries';
 
-// const ToastMessage = (toastMessage) => {
-//   <div className={`toast-message ${toastMessage ? "show" : ""}`}>
-//     {toastMessage}
-//   </div>
-// }
-
 const ToastMessage = styled.div`
   position: fixed;
   bottom: 20px;
@@ -99,8 +93,15 @@ const getSuggestions = value => {
 };
 
 const getSuggestionValue = suggestion => suggestion;
+const getSuggestionValueNew = suggestion => suggestion;
 
 const renderSuggestion = suggestion => (
+  <div>
+    {suggestion}
+  </div>
+);
+
+const renderSuggestionNew = suggestion => (
   <div>
     {suggestion}
   </div>
@@ -109,8 +110,10 @@ const renderSuggestion = suggestion => (
 function UsersTable() {
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
+  const [editingUserNew, setEditingUserNew] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
   const [suggestions, setSuggestions] = useState([]);
+  const [suggestionsNew, setSuggestionsNew] = useState([]);
   const [toastMessage, setToastMessage] = useState("");
 
 
@@ -236,8 +239,16 @@ function UsersTable() {
     setSuggestions(getSuggestions(value));
   };
 
+  const handleSuggestionsFetchRequestedNew = ({ value }) => {
+    setSuggestions(getSuggestions(value));
+  };
+
   const handleSuggestionsClearRequested = () => {
     setSuggestions([]);
+  };
+
+  const handleSuggestionsClearRequestedNew = () => {
+    setSuggestionsNew([]);
   };
 
   const inputProps = {
@@ -246,6 +257,18 @@ function UsersTable() {
     onChange: (e, { newValue }) => {
       if (editingUser) {
         setEditingUser({ ...editingUser, country: newValue });
+      } else {
+        setNewUser({ ...newUser, country: newValue });
+      }
+    },
+  };
+
+  const inputPropsNew = {
+    placeholder: 'Type a country',
+    value: editingUserNew ? editingUserNew.country : newUser.country,
+    onChange: (e, { newValue }) => {
+      if (editingUserNew) {
+        setEditingUserNew({ ...editingUserNew, country: newValue });
       } else {
         setNewUser({ ...newUser, country: newValue });
       }
@@ -371,10 +394,18 @@ function UsersTable() {
               />
             </td>
             <td>
-              <input
+              {/* <input
                 name="country"
                 value={newUser?.country}
                 onChange={handleNewUserChange}
+              /> */}
+              <Autosuggest
+                suggestions={suggestionsNew}
+                onSuggestionsFetchRequested={handleSuggestionsFetchRequestedNew}
+                onSuggestionsClearRequested={handleSuggestionsClearRequestedNew}
+                getSuggestionValue={getSuggestionValueNew}
+                renderSuggestion={renderSuggestionNew}
+                inputProps={inputPropsNew}
               />
             </td>
             <td>
@@ -383,10 +414,6 @@ function UsersTable() {
           </tr>
         </tfoot>
       </Table>
-      {/* <ToastMessage />
-      <div className={`toast-message ${toastMessage ? "show" : ""}`}>
-        {toastMessage}
-      </div> */}
       <ToastMessage className={`${toastMessage ? "show" : ""}`}>
         {toastMessage}
       </ToastMessage>
