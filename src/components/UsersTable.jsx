@@ -3,6 +3,32 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { countries } from '../data/countries';
 
+// const ToastMessage = (toastMessage) => {
+//   <div className={`toast-message ${toastMessage ? "show" : ""}`}>
+//     {toastMessage}
+//   </div>
+// }
+
+const ToastMessage = styled.div`
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px;
+  background-color: rgb(85, 239, 9);
+  color: #fff;
+  border-radius: 5px;
+  font-size: 14px;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s, opacity 0.5s linear;
+
+  &.show {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+  }
+`;
+
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -85,6 +111,8 @@ function UsersTable() {
   const [editingUser, setEditingUser] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
   const [suggestions, setSuggestions] = useState([]);
+  const [toastMessage, setToastMessage] = useState("");
+
 
   const [newUser, setNewUser] = useState({
     username: "",
@@ -103,6 +131,7 @@ function UsersTable() {
   }, []);
 
   const handleSort = (field) => {
+    showToast(`${field} column sorted`)
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     let sortedUsers = [...users]
     if (field === 'age') {
@@ -223,131 +252,145 @@ function UsersTable() {
     },
   };
 
+  const showToast = (message) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(''), 2000);
+  };
+
   return (
-    <Table>
-      <thead>
-        <tr>
-          <th>
-            <button onClick={() => handleSort('username')}>Username</button>
-          </th>
-          <th>
-            <button onClick={() => handleSort('email')}>Email</button>
-          </th>
-          <th>
-            <button onClick={() => handleSort('age')}>Age</button>
-          </th>
-          <th>
-            <button onClick={() => handleSort('country')}>Country</button>
-          </th>
-          <th>
-            <button>Actions</button>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {users.map((user) => (
-          <tr key={user.id}>
+    <>
+      <Table>
+        <thead>
+          <tr>
+            <th>
+              <button onClick={() => handleSort('username')}>Username</button>
+            </th>
+            <th>
+              <button onClick={() => handleSort('email')}>Email</button>
+            </th>
+            <th>
+              <button onClick={() => handleSort('age')}>Age</button>
+            </th>
+            <th>
+              <button onClick={() => handleSort('country')}>Country</button>
+            </th>
+            <th>
+              <button>Actions</button>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user) => (
+            <tr key={user.id}>
+              <td>
+                {editingUser?.id === user.id ? (
+                  <input
+                    name="username"
+                    value={editingUser?.username}
+                    onChange={handleEditUserChange}
+                  />
+                ) : (
+                  user.username
+                )}
+              </td>
+              <td>
+                {editingUser?.id === user.id ? (
+                  <input
+                    name="email"
+                    value={editingUser?.email}
+                    onChange={handleEditUserChange}
+                  />
+                ) : (
+                  user.email
+                )}
+              </td>
+              <td>
+                {editingUser?.id === user.id ? (
+                  <input
+                    name="age"
+                    value={editingUser?.age}
+                    onChange={handleEditUserChange}
+                  />
+                ) : (
+                  user.age
+                )}
+              </td>
+              <td>
+                {editingUser?.id === user.id ? (
+                  <Autosuggest
+                    suggestions={suggestions}
+                    onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
+                    onSuggestionsClearRequested={handleSuggestionsClearRequested}
+                    getSuggestionValue={getSuggestionValue}
+                    renderSuggestion={renderSuggestion}
+                    inputProps={inputProps}
+                  />
+                ) : (
+                  user.country
+                )}
+              </td>
+              <td>
+                {editingUser?.id === user.id ? (
+                  <>
+                    <button onClick={() => handleSaveUser(editingUser)}>
+                      Save
+                    </button>
+                    <button onClick={handleCancelEdit}>Cancel</button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => handleEditUser(user)}>Edit</button>
+                    <button onClick={() => handleDeleteUser(user)}>Delete</button>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
             <td>
-              {editingUser?.id === user.id ? (
-                <input
-                  name="username"
-                  value={editingUser?.username}
-                  onChange={handleEditUserChange}
-                />
-              ) : (
-                user.username
-              )}
+              <input
+                name="username"
+                value={newUser?.username}
+                onChange={handleNewUserChange}
+              />
             </td>
             <td>
-              {editingUser?.id === user.id ? (
-                <input
-                  name="email"
-                  value={editingUser?.email}
-                  onChange={handleEditUserChange}
-                />
-              ) : (
-                user.email
-              )}
+              <input
+                name="email"
+                value={newUser?.email}
+                onChange={handleNewUserChange}
+              />
             </td>
             <td>
-              {editingUser?.id === user.id ? (
-                <input
-                  name="age"
-                  value={editingUser?.age}
-                  onChange={handleEditUserChange}
-                />
-              ) : (
-                user.age
-              )}
+              <input
+                name="age"
+                value={newUser?.age}
+                onChange={handleNewUserChange}
+              />
             </td>
             <td>
-              {editingUser?.id === user.id ? (
-                <Autosuggest
-                  suggestions={suggestions}
-                  onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
-                  onSuggestionsClearRequested={handleSuggestionsClearRequested}
-                  getSuggestionValue={getSuggestionValue}
-                  renderSuggestion={renderSuggestion}
-                  inputProps={inputProps}
-                />
-              ) : (
-                user.country
-              )}
+              <input
+                name="country"
+                value={newUser?.country}
+                onChange={handleNewUserChange}
+              />
             </td>
             <td>
-              {editingUser?.id === user.id ? (
-                <>
-                  <button onClick={() => handleSaveUser(editingUser)}>
-                    Save
-                  </button>
-                  <button onClick={handleCancelEdit}>Cancel</button>
-                </>
-              ) : (
-                <>
-                  <button onClick={() => handleEditUser(user)}>Edit</button>
-                  <button onClick={() => handleDeleteUser(user)}>Delete</button>
-                </>
-              )}
+              <button onClick={handleCreateUser}>Create</button>
             </td>
           </tr>
-        ))}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td>
-            <input
-              name="username"
-              value={newUser?.username}
-              onChange={handleNewUserChange}
-            />
-          </td>
-          <td>
-            <input
-              name="email"
-              value={newUser?.email}
-              onChange={handleNewUserChange}
-            />
-          </td>
-          <td>
-            <input
-              name="age"
-              value={newUser?.age}
-              onChange={handleNewUserChange}
-            />
-          </td>
-          <td>
-            <input
-              name="country"
-              value={newUser?.country}
-              onChange={handleNewUserChange}
-            />
-          </td>
-          <td>
-            <button onClick={handleCreateUser}>Create</button>
-          </td>
-        </tr>
-      </tfoot>
-    </Table>
+        </tfoot>
+      </Table>
+      {/* <ToastMessage />
+      <div className={`toast-message ${toastMessage ? "show" : ""}`}>
+        {toastMessage}
+      </div> */}
+      <ToastMessage className={`${toastMessage ? "show" : ""}`}>
+        {toastMessage}
+      </ToastMessage>
+    </>
   );
 }
 
