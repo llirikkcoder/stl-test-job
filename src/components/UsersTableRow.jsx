@@ -131,28 +131,6 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
       </td>
       <td>
         {editingUser?.id === user.id ? (
-          // <AutosuggestField
-          //   suggestions={suggestions}
-          //   onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
-          //   onSuggestionsClearRequested={handleSuggestionsClearRequested}
-          //   getSuggestionValue={getSuggestionValue}
-          //   renderSuggestion={renderSuggestion}
-          //   inputProps={inputProps}
-          //   value={editingUser?.country}
-          // />
-
-          // <AutosuggestField
-          //   suggestions={suggestions}
-          //   onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
-          //   onSuggestionsClearRequested={handleSuggestionsClearRequested}
-          //   getSuggestionValue={getSuggestionValue}
-          //   renderSuggestion={renderSuggestion}
-          //   inputProps={{
-          //     placeholder: "Country",
-          //     value: editingUser?.country,
-          //     onChange: handleEditUserChange
-          //   }}
-          // />
 
           <AutosuggestField
             suggestions={suggestions}
@@ -165,7 +143,6 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
             onChange={handleEditUserChange}
           />
 
-          // <></>
         ) : (
           user.country
         )}
