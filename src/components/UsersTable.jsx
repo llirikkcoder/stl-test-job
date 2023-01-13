@@ -3,12 +3,6 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { countries } from '../data/countries';
 
-// const ToastMessage = (toastMessage) => {
-//   <div className={`toast-message ${toastMessage ? "show" : ""}`}>
-//     {toastMessage}
-//   </div>
-// }
-
 const ToastMessage = styled.div`
   position: fixed;
   bottom: 20px;
@@ -113,6 +107,19 @@ function UsersTable() {
   const [suggestions, setSuggestions] = useState([]);
   const [toastMessage, setToastMessage] = useState("");
 
+  const [suggestionsNew, setSuggestionsNew] = useState([]);
+  // const [inputPropsNew, setInputPropsNew] = useState({});
+
+  const handleSuggestionsFetchRequestedNew = ({ value }) => {
+    setSuggestionsNew(getSuggestions(value));
+  };
+
+  const handleSuggestionsClearRequestedNew = () => {
+    setSuggestionsNew([]);
+  };
+
+  const getSuggestionValueNew = suggestion => suggestion;
+  const renderSuggestionNew = suggestion => <div>{suggestion}</div>;
 
   const [newUser, setNewUser] = useState({
     username: "",
@@ -120,6 +127,8 @@ function UsersTable() {
     age: "",
     country: ""
   });
+
+
 
   useEffect(() => {
     async function fetchUsers() {
@@ -252,6 +261,14 @@ function UsersTable() {
     },
   };
 
+  const inputPropsNew = {
+    placeholder: 'Type a country',
+    value: newUser.country,
+    onChange: (event, { newValue }) => {
+      setNewUser({ ...newUser, country: newValue });
+    }
+  };
+
   const showToast = (message) => {
     setToastMessage(message);
     setTimeout(() => setToastMessage(''), 2000);
@@ -371,11 +388,15 @@ function UsersTable() {
               />
             </td>
             <td>
-              <input
-                name="country"
-                value={newUser?.country}
-                onChange={handleNewUserChange}
+              <Autosuggest
+                suggestions={suggestionsNew}
+                onSuggestionsFetchRequested={handleSuggestionsFetchRequestedNew}
+                onSuggestionsClearRequested={handleSuggestionsClearRequestedNew}
+                getSuggestionValue={getSuggestionValueNew}
+                renderSuggestion={renderSuggestionNew}
+                inputProps={inputPropsNew}
               />
+
             </td>
             <td>
               <button onClick={handleCreateUser}>Create</button>
@@ -383,10 +404,6 @@ function UsersTable() {
           </tr>
         </tfoot>
       </Table>
-      {/* <ToastMessage />
-      <div className={`toast-message ${toastMessage ? "show" : ""}`}>
-        {toastMessage}
-      </div> */}
       <ToastMessage className={`${toastMessage ? "show" : ""}`}>
         {toastMessage}
       </ToastMessage>
