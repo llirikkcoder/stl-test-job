@@ -1,87 +1,9 @@
-import Autosuggest from 'react-autosuggest';
 import { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { countries } from '../data/countries';
-
-const ToastMessage = styled.div`
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 10px;
-  background-color: rgb(85, 239, 9);
-  color: #fff;
-  border-radius: 5px;
-  font-size: 14px;
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 0s, opacity 0.5s linear;
-
-  &.show {
-    visibility: visible;
-    opacity: 1;
-    transition-delay: 0s;
-  }
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #282c34;
-  min-height: 100vh;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-
-  th,
-  td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
-
-  .react-autosuggest__container {
-  position: relative;
-}
-
-.react-autosuggest__input {
-  width: 240px;
-  height: 30px;
-  padding: 10px 20px;
-  font-family: Helvetica, sans-serif;
-  font-weight: 300;
-  font-size: 16px;
-  border: 1px solid #aaa;
-  border-radius: 4px;
-  background-color: #282c34;
-  color: white;
-}
-
-.react-autosuggest__input--focused {
-  outline: none;
-}
-
-.react-autosuggest__input--open {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.react-autosuggest__suggestions-container--open {
-  display: block;
-  position: absolute;
-  top: 51px;
-  width: 280px;
-  border: 1px solid #aaa;
-  background-color: #282c34;
-  font-family: Helvetica, sans-serif;
-  font-weight: 300;
-  font-size: 16px;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-  z-index: 2;
-  cursor: pointer;
-}
-`;
+import ToastMessage from './ToastMessage';
+import Table from './Table';
+import AutosuggestField from './Autosuggest';
+import AutosuggestFieldNew from './AutosuggestNew';
 
 const getSuggestions = value => {
   const inputValue = value.trim().toLowerCase();
@@ -101,24 +23,17 @@ const renderSuggestion = suggestion => (
 );
 
 function UsersTable() {
+
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
   const [suggestions, setSuggestions] = useState([]);
-  const [toastMessage, setToastMessage] = useState("");
-
   const [suggestionsNew, setSuggestionsNew] = useState([]);
+  const [toastMessage, setToastMessage] = useState("");
 
   const handleSuggestionsFetchRequestedNew = ({ value }) => {
     setSuggestionsNew(getSuggestions(value));
   };
-
-  const handleSuggestionsClearRequestedNew = () => {
-    setSuggestionsNew([]);
-  };
-
-  const getSuggestionValueNew = suggestion => suggestion;
-  const renderSuggestionNew = suggestion => <div>{suggestion}</div>;
 
   const [newUser, setNewUser] = useState({
     username: "",
@@ -276,18 +191,11 @@ function UsersTable() {
       <Table>
         <thead>
           <tr>
-            <th>
-              <button onClick={() => handleSort('username')}>Username</button>
-            </th>
-            <th>
-              <button onClick={() => handleSort('email')}>Email</button>
-            </th>
-            <th>
-              <button onClick={() => handleSort('age')}>Age</button>
-            </th>
-            <th>
-              <button onClick={() => handleSort('country')}>Country</button>
-            </th>
+            {["username", "email", "age", "country"].map((item) => (
+              <th>
+                <button onClick={() => handleSort(item)}>{item.charAt(0).toUpperCase() + item.slice(1)}</button>
+              </th>
+            ))}
             <th>
               <button>Actions</button>
             </th>
@@ -296,42 +204,22 @@ function UsersTable() {
         <tbody>
           {users.map((user) => (
             <tr key={user.id}>
+              {["username", "email", "age"].map((item) => (
+                <td>
+                  {editingUser?.id === user.id ? (
+                    <input
+                      name={item}
+                      value={editingUser?.[item]}
+                      onChange={handleEditUserChange}
+                    />
+                  ) : (
+                    user[item]
+                  )}
+                </td>
+              ))}
               <td>
                 {editingUser?.id === user.id ? (
-                  <input
-                    name="username"
-                    value={editingUser?.username}
-                    onChange={handleEditUserChange}
-                  />
-                ) : (
-                  user.username
-                )}
-              </td>
-              <td>
-                {editingUser?.id === user.id ? (
-                  <input
-                    name="email"
-                    value={editingUser?.email}
-                    onChange={handleEditUserChange}
-                  />
-                ) : (
-                  user.email
-                )}
-              </td>
-              <td>
-                {editingUser?.id === user.id ? (
-                  <input
-                    name="age"
-                    value={editingUser?.age}
-                    onChange={handleEditUserChange}
-                  />
-                ) : (
-                  user.age
-                )}
-              </td>
-              <td>
-                {editingUser?.id === user.id ? (
-                  <Autosuggest
+                  <AutosuggestField
                     suggestions={suggestions}
                     onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
                     onSuggestionsClearRequested={handleSuggestionsClearRequested}
@@ -385,12 +273,12 @@ function UsersTable() {
               />
             </td>
             <td>
-              <Autosuggest
+              <AutosuggestFieldNew
                 suggestions={suggestionsNew}
                 onSuggestionsFetchRequested={handleSuggestionsFetchRequestedNew}
-                onSuggestionsClearRequested={handleSuggestionsClearRequestedNew}
-                getSuggestionValue={getSuggestionValueNew}
-                renderSuggestion={renderSuggestionNew}
+                onSuggestionsClearRequested={handleSuggestionsClearRequested}
+                getSuggestionValue={getSuggestionValue}
+                renderSuggestion={renderSuggestion}
                 inputProps={inputPropsNew}
               />
             </td>
