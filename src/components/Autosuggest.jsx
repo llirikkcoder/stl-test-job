@@ -1,34 +1,33 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import Autosuggest from 'react-autosuggest';
 
-const AutosuggestField = ({
-  suggestions,
-  onSuggestionsFetchRequested,
-  onSuggestionsClearRequested,
-  getSuggestionValue,
-  renderSuggestion,
-  inputProps
-}) => {
+function AutosuggestField({ suggestions, onChange, onSuggestionsFetchRequested, onSuggestionsClearRequested, getSuggestionValue, renderSuggestion, inputProps, value }) {
+
+  const handleFetchRequest = (event) => {
+    onSuggestionsFetchRequested({ value: event.target.value });
+  }
+
+  const handleClearRequest = () => {
+    onSuggestionsClearRequested();
+  }
+
   return (
-    <Autosuggest
-      suggestions={suggestions}
-      onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-      onSuggestionsClearRequested={onSuggestionsClearRequested}
-      getSuggestionValue={getSuggestionValue}
-      renderSuggestion={renderSuggestion}
-      inputProps={inputProps}
-    />
+    <>
+      <input
+        {...inputProps}
+        value={value}
+        onChange={onChange}
+        onKeyUp={handleFetchRequest}
+        onBlur={handleClearRequest}
+      />
+      <ul>
+        {suggestions.map((suggestion) => (
+          <li key={suggestion}>
+            {renderSuggestion(getSuggestionValue(suggestion))}
+          </li>
+        ))}
+      </ul>
+    </>
   );
-};
-
-AutosuggestField.propTypes = {
-  suggestions: PropTypes.array.isRequired,
-  onSuggestionsFetchRequested: PropTypes.func.isRequired,
-  onSuggestionsClearRequested: PropTypes.func.isRequired,
-  getSuggestionValue: PropTypes.func.isRequired,
-  renderSuggestion: PropTypes.func.isRequired,
-  inputProps: PropTypes.object.isRequired
 };
 
 export default AutosuggestField;
