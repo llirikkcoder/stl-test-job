@@ -1,8 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import AutosuggestField from './Autosuggest';
 import { countries } from '../data/countries';
+import styled from 'styled-components';
 
-function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, handleEditUserChange, handleEditUser, handleDeleteUser, handleUpdateUsers }) {
+const ToastMessageStyle = styled.div`
+position: fixed;
+bottom: 20px;
+right: 20px;
+padding: 10px;
+background-color: rgb(85, 239, 9);
+color: #fff;
+border-radius: 5px;
+font-size: 14px;
+visibility: hidden;
+opacity: 0;
+transition: visibility 0s, opacity 0.5s linear;
+
+&.show {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0s;
+}
+`;
+
+function ToastMessage({ message }) {
+  const [error, setError] = useState(null);
+
+  if (error) {
+    throw error;
+  }
+
+  return <ToastMessageStyle>{message}</ToastMessageStyle>;
+}
+
+function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, handleEditUserChange, handleEditUser, handleDeleteUser, handleUpdateUsers, setToastMessage }) {
 
   const [suggestions, setSuggestions] = useState([]);
   const [newUser, setNewUser] = useState({
@@ -11,6 +42,12 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
     age: "",
     country: ""
   });
+  const [emailError, setEmailError] = useState("");
+
+  const validateEmail = (email) => {
+    const re = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+    return re.test(String(email).toLowerCase());
+  }
 
   useEffect(() => {
     async function fetchUsers() {
@@ -21,36 +58,46 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
     fetchUsers();
   }, [setUsers]);
 
+
+
   const handleSaveUser = (user) => {
-    async function saveUser(user) {
-      let response;
+    if (!validateEmail(user.email)) {
+      setEmailError("Invalid email address");
+      // setToastMessage(<ToastMessage message={emailError} />)
+    } else {
+      // setEmailError("");
+      setEmailError(null);
 
-      if (user.id) {
-        // редактировать существующего пользователя
-        response = await fetch(`http://localhost:3001/users/${user.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(user)
-        });
-      } else {
-        // создать нового пользователя
-        response = await fetch("http://localhost:3001/users", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(user)
-        });
+      async function saveUser(user) {
+        let response;
+
+        if (user.id) {
+          // редактировать существующего пользователя
+          response = await fetch(`http://localhost:3001/users/${user.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(user)
+          });
+        } else {
+          // создать нового пользователя
+          response = await fetch("http://localhost:3001/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(user)
+          });
+        }
+        const savedUser = await response.json();
+
+        const updatedUsers = user.id
+          ? users.map((u) => (u.id === savedUser.id ? savedUser : u))
+          : [...users, savedUser];
+
+        setUsers(updatedUsers);
+        handleUpdateUsers(updatedUsers);
       }
-      const savedUser = await response.json();
-
-      const updatedUsers = user.id
-        ? users.map((u) => (u.id === savedUser.id ? savedUser : u))
-        : [...users, savedUser];
-
-      setUsers(updatedUsers);
-      handleUpdateUsers(updatedUsers);
+      setEditingUser(null);
+      saveUser(user);
     }
-    setEditingUser(null);
-    saveUser(user);
   };
 
   const getSuggestions = value => {
@@ -109,11 +156,15 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
       </td>
       <td>
         {editingUser?.id === user.id ? (
-          <input
-            name="email"
-            value={editingUser?.email}
-            onChange={handleEditUserChange}
-          />
+          <>
+            <input
+              name="email"
+              type="email"
+              value={editingUser?.email}
+              onChange={handleEditUserChange}
+            />
+            {emailError ? <span style={{ color: "red" }}>{emailError}</span> : null}
+          </>
         ) : (
           user.email
         )}
@@ -122,6 +173,7 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
         {editingUser?.id === user.id ? (
           <input
             name="age"
+            type="number"
             value={editingUser?.age}
             onChange={handleEditUserChange}
           />
@@ -163,3 +215,5 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
 }
 
 export default UsersTableRow;
+
+

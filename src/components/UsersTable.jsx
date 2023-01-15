@@ -1,9 +1,30 @@
 import { useEffect, useState } from 'react';
 import { countries } from '../data/countries';
-import ToastMessage from './ToastMessage';
+// import ToastMessage from './ToastMessage';
 import Table from './Table';
 import AutosuggestFieldNew from './AutosuggestNew';
 import UsersTableRow from './UsersTableRow';
+import styled from 'styled-components';
+
+const ToastMessage = styled.div`
+position: fixed;
+bottom: 20px;
+right: 20px;
+padding: 10px;
+background-color: rgb(85, 239, 9);
+color: #fff;
+border-radius: 5px;
+font-size: 14px;
+visibility: hidden;
+opacity: 0;
+transition: visibility 0s, opacity 0.5s linear;
+
+&.show {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0s;
+}
+`;
 
 const getSuggestions = value => {
   const inputValue = value.trim().toLowerCase();
@@ -169,8 +190,12 @@ function UsersTable() {
     setUsers(updatedUsers);
   }
 
+  const formHandler = (event) => {
+    event.preventDefault();
+  };
+
   return (
-    <>
+    <form onSubmit={formHandler}>
       <Table>
         <thead>
           <tr>
@@ -197,6 +222,7 @@ function UsersTable() {
             handleUpdateUsers={handleUpdateUsers}
             users={users}
             setUsers={setUsers}
+            setToastMessage={setToastMessage}
           />
         ))}
         <tfoot>
@@ -241,7 +267,8 @@ function UsersTable() {
       <ToastMessage className={`${toastMessage ? "show" : ""}`}>
         {toastMessage}
       </ToastMessage>
-    </>
+      {/* <ToastMessageNew message={toastMessage} /> */}
+    </form>
   );
 }
 
