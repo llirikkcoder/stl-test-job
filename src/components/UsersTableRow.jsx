@@ -26,8 +26,6 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
     fetchUsers();
   }, [setUsers]);
 
-
-
   const handleSaveUser = (user) => {
     if (!validateEmail(user.email)) {
       showToast('Invalid email address!')
@@ -128,7 +126,6 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
               value={editingUser?.email}
               onChange={handleEditUserChange}
             />
-            {/* {emailError ? <span style={{ color: "red" }}>{emailError}</span> : null} */}
           </>
         ) : (
           user.email
@@ -157,7 +154,6 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
             inputProps={inputProps}
             value={editingUser?.country}
           />
-          // <></>
         ) : (
           user.country
         )}

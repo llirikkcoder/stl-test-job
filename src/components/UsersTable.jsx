@@ -1,11 +1,70 @@
 import { useEffect, useState } from 'react';
 import { countries } from '../data/countries';
-import Table from './Table';
 import AutosuggestFieldNew from './AutosuggestNew';
 import UsersTableRow from './UsersTableRow';
 import styled from 'styled-components';
 
 let isEmailNotValid = false;
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #282c34;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+
+  th,
+  td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .react-autosuggest__container {
+  position: relative;
+}
+
+.react-autosuggest__input {
+  width: 240px;
+  height: 30px;
+  padding: 10px 20px;
+  font-family: Helvetica, sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background-color: #282c34;
+  color: white;
+}
+
+.react-autosuggest__input--focused {
+  outline: none;
+}
+
+.react-autosuggest__input--open {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.react-autosuggest__suggestions-container--open {
+  display: block;
+  position: absolute;
+  top: 51px;
+  width: 280px;
+  border: 1px solid #aaa;
+  background-color: #282c34;
+  font-family: Helvetica, sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  z-index: 2;
+  cursor: pointer;
+}
+`;
 
 const ToastMessage = styled.div`
 position: fixed;
@@ -26,16 +85,6 @@ transition: visibility 0s, opacity 0.5s linear;
   transition-delay: 0s;
 }
 `;
-
-// function ToastMessageNew({ message }) {
-//   const [error, setError] = useState(null);
-
-//   if (error) {
-//     throw error;
-//   }
-
-//   return <div>{message}</div>;
-// }
 
 const getSuggestions = value => {
   const inputValue = value.trim().toLowerCase();
@@ -87,28 +136,9 @@ function UsersTable() {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     let sortedUsers = [...users]
     if (field === 'age') {
-      sortedUsers = sortOrder === "asc" ? sortedUsers.sort((a, b) => a[field] - b[field]) : sortedUsers.sort((a, b) => b[field] - a[field])
+      sortedUsers = sortOrder === "asc" ? sortedUsers.sort((a, b) => a[field] - b[field]) : sortedUsers.sort((a, b) => b[field] - a[field]);
     } else {
-      sortedUsers = sortOrder === "asc" ?
-        sortedUsers.sort((a, b) => {
-          if (a[field].toLowerCase() < b[field].toLowerCase()) {
-            return -1;
-          }
-          if (a[field].toLowerCase() > b[field].toLowerCase()) {
-            return 1;
-          }
-          return 0;
-        })
-        :
-        sortedUsers.sort((a, b) => {
-          if (b[field].toLowerCase() < a[field].toLowerCase()) {
-            return -1;
-          }
-          if (b[field].toLowerCase() > a[field].toLowerCase()) {
-            return 1;
-          }
-          return 0;
-        });
+      sortedUsers = sortOrder === "asc" ? sortedUsers.sort((a, b) => a[field].localeCompare(b[field])) : sortedUsers.sort((a, b) => b[field].localeCompare(a[field]));
     }
     setUsers(sortedUsers);
   };
@@ -284,7 +314,6 @@ function UsersTable() {
       <ToastMessage className={`${toastMessage ? "show" : ""}`} error={isEmailNotValid} >
         {toastMessage}
       </ToastMessage>
-      {/* <ToastMessageNew message={'Validation error!'} /> */}
     </form>
   );
 }
