@@ -1,39 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import AutosuggestField from './Autosuggest';
 import { countries } from '../data/countries';
-import styled from 'styled-components';
 
-const ToastMessageStyle = styled.div`
-position: fixed;
-bottom: 20px;
-right: 20px;
-padding: 10px;
-background-color: rgb(85, 239, 9);
-color: #fff;
-border-radius: 5px;
-font-size: 14px;
-visibility: hidden;
-opacity: 0;
-transition: visibility 0s, opacity 0.5s linear;
-
-&.show {
-  visibility: visible;
-  opacity: 1;
-  transition-delay: 0s;
-}
-`;
-
-function ToastMessage({ message }) {
-  const [error, setError] = useState(null);
-
-  if (error) {
-    throw error;
-  }
-
-  return <ToastMessageStyle>{message}</ToastMessageStyle>;
-}
-
-function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, handleEditUserChange, handleEditUser, handleDeleteUser, handleUpdateUsers, setToastMessage }) {
+function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, handleEditUserChange, handleEditUser, handleDeleteUser, handleUpdateUsers, setToastMessage, showToast }) {
 
   const [suggestions, setSuggestions] = useState([]);
   const [newUser, setNewUser] = useState({
@@ -42,7 +11,6 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
     age: "",
     country: ""
   });
-  const [emailError, setEmailError] = useState("");
 
   const validateEmail = (email) => {
     const re = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
@@ -62,11 +30,8 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
 
   const handleSaveUser = (user) => {
     if (!validateEmail(user.email)) {
-      setEmailError("Invalid email address");
-      // setToastMessage(<ToastMessage message={emailError} />)
+      showToast('Invalid email address!')
     } else {
-      // setEmailError("");
-      setEmailError(null);
 
       async function saveUser(user) {
         let response;
@@ -163,7 +128,7 @@ function UsersTableRow({ user, users, setUsers, editingUser, setEditingUser, han
               value={editingUser?.email}
               onChange={handleEditUserChange}
             />
-            {emailError ? <span style={{ color: "red" }}>{emailError}</span> : null}
+            {/* {emailError ? <span style={{ color: "red" }}>{emailError}</span> : null} */}
           </>
         ) : (
           user.email

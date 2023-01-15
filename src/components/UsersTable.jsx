@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
 import { countries } from '../data/countries';
-// import ToastMessage from './ToastMessage';
 import Table from './Table';
 import AutosuggestFieldNew from './AutosuggestNew';
 import UsersTableRow from './UsersTableRow';
 import styled from 'styled-components';
+
+let isEmailNotValid = false;
 
 const ToastMessage = styled.div`
 position: fixed;
 bottom: 20px;
 right: 20px;
 padding: 10px;
-background-color: rgb(85, 239, 9);
+background-color: ${props => props.error ? "rgb(255,0,0)" : "rgb(85, 239, 9)"};
 color: #fff;
 border-radius: 5px;
 font-size: 14px;
@@ -25,6 +26,16 @@ transition: visibility 0s, opacity 0.5s linear;
   transition-delay: 0s;
 }
 `;
+
+// function ToastMessageNew({ message }) {
+//   const [error, setError] = useState(null);
+
+//   if (error) {
+//     throw error;
+//   }
+
+//   return <div>{message}</div>;
+// }
 
 const getSuggestions = value => {
   const inputValue = value.trim().toLowerCase();
@@ -182,6 +193,11 @@ function UsersTable() {
   };
 
   const showToast = (message) => {
+    if (message === 'Invalid email address!') {
+      isEmailNotValid = true;
+    } else {
+      isEmailNotValid = false;
+    }
     setToastMessage(message);
     setTimeout(() => setToastMessage(''), 2000);
   };
@@ -223,6 +239,7 @@ function UsersTable() {
             users={users}
             setUsers={setUsers}
             setToastMessage={setToastMessage}
+            showToast={showToast}
           />
         ))}
         <tfoot>
@@ -264,10 +281,10 @@ function UsersTable() {
           </tr>
         </tfoot>
       </Table>
-      <ToastMessage className={`${toastMessage ? "show" : ""}`}>
+      <ToastMessage className={`${toastMessage ? "show" : ""}`} error={isEmailNotValid} >
         {toastMessage}
       </ToastMessage>
-      {/* <ToastMessageNew message={toastMessage} /> */}
+      {/* <ToastMessageNew message={'Validation error!'} /> */}
     </form>
   );
 }
